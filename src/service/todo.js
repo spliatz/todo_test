@@ -25,7 +25,26 @@ class TodoService {
     }
 
     async getOne(todoId) {
-        return await this.#model.findOne({_id: todoId})
+        return this.#model.findOne({_id: todoId})
+    }
+
+    async getAllByUserId(userId, page, limit ) {
+        page = page && page < 1 ? 1 : page
+        limit = page && limit < 1 ? 10 : limit
+
+        if (!page && limit) {
+            page = 1
+        } else if (!limit && page) {
+            limit = 10
+        }
+
+        if (!page && !limit) {
+            return this.#model.find({author: userId})
+        }
+
+        page = page === 1 ? 0 : page - 1
+
+        return this.#model.find({author: userId}).skip(page*limit).limit(limit)
     }
 
     async editOne(todoId, title, description) {

@@ -8,6 +8,7 @@ class TodoController {
 
         this.create = this.create.bind(this);
         this.getOne = this.getOne.bind(this);
+        this.getAllByUserId = this.getAllByUserId.bind(this);
         this.deleteOne = this.deleteOne.bind(this);
         this.editOne = this.editOne.bind(this);
     }
@@ -53,6 +54,28 @@ class TodoController {
         try {
             const todoItem = await this.#service.getOne(id)
             return res.status(200).json(todoItem)
+        } catch (e) {
+            return res.status(500).json({message: e.message})
+        }
+    }
+
+    async getAllByUserId(req, res) {
+        const {userId} = req.params;
+        const user = req.user;
+        if (user.id !== userId) {
+            return res.status(401).json({message: "нет доступа"})
+        }
+
+        const {page, limit} = req.query
+        if (
+            (page || limit) &&
+            (page && isNaN(Number(page)) || limit && isNaN(Number(limit)))
+        ) {
+            return res.status(400).json({message: 'некорректные значения page или limit'})
+        }
+        try {
+            const todos = await this.#service.getAllByUserId(user._id, Number(page), Number(limit))
+            return res.status(200).json(todos)
         } catch (e) {
             return res.status(500).json({message: e.message})
         }

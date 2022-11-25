@@ -48,7 +48,7 @@ const bootstrap = async () => {
     const authController = new AuthController(authService, userService);
     const authMiddleware = new AuthMiddleware(userService, authService);
 
-    const userRouter = new UserRouter(userController, authMiddleware);
+    const userRouter = new UserRouter(userController, todoController, authMiddleware);
     const todoRouter = new TodoRouter(todoController, authMiddleware);
     const authRouter = new AuthRouter(authController, authMiddleware);
 
