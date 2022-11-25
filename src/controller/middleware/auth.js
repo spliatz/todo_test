@@ -27,8 +27,7 @@ class AuthMiddleware {
             req.user = user
             next();
         } catch (e) {
-            console.log(e.message)
-            return res.status(500).json({message: 'invalid access token'})
+            return res.status(401).json({message: 'invalid access token'})
         }
     }
 
@@ -52,7 +51,7 @@ class AuthMiddleware {
             next();
         } catch (e) {
             console.log(e.message)
-            return res.status(500).json({message: 'invalid refresh token'})
+            return res.status(401).json({message: 'invalid refresh token'})
         }
     }
 
