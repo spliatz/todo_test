@@ -1,11 +1,24 @@
+import {Request, Response} from "express";
 import {validationResult} from "express-validator";
+import {getErrorMessage} from "../pkg/errors/exceptions";
+import {Types} from "mongoose";
+import {ITodo} from "../entity/todo";
+
+abstract class ITodoService {
+    abstract create(userId: Types.ObjectId, title: string, description: string): Promise<string>;
+
+    abstract editOne(id: string, title: string, description: string): Promise<ITodo | null>;
+
+    abstract getOne(id: string): Promise<ITodo | null>
+
+    abstract deleteOne(id: string): Promise<void>;
+
+    abstract getAllByUserId(userId: Types.ObjectId, page: number, limit: number): Promise<ITodo[]>;
+}
 
 class TodoController {
-    #service;
 
-    constructor(service) {
-        this.#service = service;
-
+    constructor(private readonly todoService: ITodoService) {
         this.create = this.create.bind(this);
         this.getOne = this.getOne.bind(this);
         this.getAllByUserId = this.getAllByUserId.bind(this);
@@ -13,7 +26,7 @@ class TodoController {
         this.editOne = this.editOne.bind(this);
     }
 
-    async create(req, res) {
+    async create(req: Request, res: Response) {
         const errors = validationResult(req)
 
         if (!errors.isEmpty()) {
@@ -23,43 +36,43 @@ class TodoController {
         const {title, description} = req.body
         const user = req.user
         try {
-            const id = await this.#service.create(user._id, title, description)
+            const id = await this.todoService.create(user._id, title, description)
             res.status(201).json({id})
         } catch (e) {
-            return res.status(500).json({message: e.message})
+            return res.status(500).json({message: getErrorMessage(e)})
         }
 
     }
 
-    async deleteOne(req, res) {
+    async deleteOne(req: Request, res: Response) {
         const {id} = req.params;
         const user = req.user;
         try {
-            const todoItem = await this.#service.getOne(id);
+            const todoItem = await this.todoService.getOne(id);
             if (!todoItem) {
                 return res.status(403).json({message: "todo item does not exist"});
             }
             if (!todoItem.author.equals(user._id)) {
                 return res.status(401).json({message: "only author can delete todo-item"});
             }
-            await this.#service.deleteOne(id)
+            await this.todoService.deleteOne(id)
             return res.sendStatus(200)
         } catch (e) {
-            return res.status(500).json({message: e.message})
+            return res.status(500).json({message: getErrorMessage(e)})
         }
     }
 
-    async getOne(req, res) {
+    async getOne(req: Request, res: Response) {
         const {id} = req.params
         try {
-            const todoItem = await this.#service.getOne(id)
+            const todoItem = await this.todoService.getOne(id)
             return res.status(200).json(todoItem)
         } catch (e) {
-            return res.status(500).json({message: e.message})
+            return res.status(500).json({message: getErrorMessage(e)})
         }
     }
 
-    async getAllByUserId(req, res) {
+    async getAllByUserId(req: Request, res: Response) {
         const {userId} = req.params;
         const user = req.user;
         if (user.id !== userId) {
@@ -74,14 +87,14 @@ class TodoController {
             return res.status(400).json({message: 'некорректные значения page или limit'})
         }
         try {
-            const todos = await this.#service.getAllByUserId(user._id, Number(page), Number(limit))
+            const todos = await this.todoService.getAllByUserId(user._id, Number(page), Number(limit))
             return res.status(200).json(todos)
         } catch (e) {
-            return res.status(500).json({message: e.message})
+            return res.status(500).json({message: getErrorMessage(e)})
         }
     }
 
-    async editOne(req, res) {
+    async editOne(req: Request, res: Response) {
         const errors = validationResult(req)
 
         if (!errors.isEmpty()) {
@@ -93,17 +106,17 @@ class TodoController {
         const user = req.user;
 
         try {
-            const todoItem = await this.#service.getOne(id);
+            const todoItem = await this.todoService.getOne(id);
             if (!todoItem) {
                 return res.status(403).json({message: "todo item does not exist"});
             }
             if (!todoItem.author.equals(user._id)) {
                 return res.status(401).json({message: "only author can edit todo-item"});
             }
-            const updatedTodoItem = await this.#service.editOne(id, title, description);
+            const updatedTodoItem = await this.todoService.editOne(id, title, description);
             return res.status(200).json(updatedTodoItem);
         } catch (e) {
-            return res.status(500).json({message: e.message})
+            return res.status(500).json({message: getErrorMessage(e)})
         }
     }
 

@@ -1,19 +1,18 @@
-import JwtHelper from "../pkg/auth/jwt.js";
-import Refresh from "../entity/refresh.js";
+import {IRefresh, RefreshModelType} from "../entity/refresh";
+import {ITokens} from "../types/auth";
+import {Types} from "mongoose";
+import JwtHelper from "../pkg/auth/jwt";
 
 class AuthService {
-    #refreshModel; // Refresh model
 
-    constructor(refreshModel) {
-        this.#refreshModel = refreshModel;
-    }
+    constructor(private readonly refreshModel: RefreshModelType) {}
 
     /**
      * Генерирует связку из двух токенов - Access и Refresh
      * @param {string} id id пользователя
-     * @returns {{access: {token: (string)}, refresh: {token: (string)}}}
+     * @returns {ITokens}
      */
-    generateTokens(id) {
+    public generateTokens(id: string): ITokens {
         const accessToken = JwtHelper.generateAccess(id)
         const refreshToken = JwtHelper.generateRefresh(id)
         return {
@@ -25,12 +24,12 @@ class AuthService {
     /**
      * Метод получения refresh токена по ID пользователя
      * @param {string} token
-     * @param {string} userId
-     * @returns {void}
+     * @param {Types.ObjectId} userId
+     * @returns {Promise<void>}
      */
-    async saveRefresh(token, userId) {
+    public async saveRefresh(token: string, userId: Types.ObjectId): Promise<void> {
         const now = new Date()
-        const refresh = new this.#refreshModel({
+        const refresh = new this.refreshModel({
             token: token,
             created_at: now.getTime(),
             expires_at: now.getTime() + (86400000 * 30),
@@ -41,20 +40,20 @@ class AuthService {
 
     /**
      * Метод получения refresh токена по ID пользователя
-     * @param {string} userId
-     * @returns {Promise}
+     * @param {Types.ObjectId} userId
+     * @returns {Promise<IRefresh | null>}
      */
-    async getRefreshByUserId(userId) {
-        return this.#refreshModel.findOne({user: userId});
+    public async getRefreshByUserId(userId: Types.ObjectId): Promise<IRefresh | null> {
+        return this.refreshModel.findOne({user: userId});
     }
 
     /**
      * Метод удаления refresh токена по ID пользователя
-     * @param {string} userId
-     * @returns {Promise<Refresh>}
+     * @param {Types.ObjectId} userId
+     * @returns {Promise<void>}
      */
-    async deleteRefreshByUserId(userId) {
-        return this.#refreshModel.deleteOne({user: userId});
+    public async deleteRefreshByUserId(userId: Types.ObjectId): Promise<void> {
+        await this.refreshModel.deleteOne({user: userId});
     }
 
 }

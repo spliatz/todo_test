@@ -1,75 +1,84 @@
-import JwtHelper from "../../pkg/auth/jwt.js";
+import JwtHelper from "../../pkg/auth/jwt";
+import {NextFunction, Request, Response} from 'express';
+import {IUser} from "../../entity/user";
+import {IRefresh} from "../../entity/refresh";
+import {getErrorMessage} from "../../pkg/errors/exceptions";
+import {Types} from "mongoose";
+
+abstract class IUserService {
+    abstract getOneById(s: string): Promise<IUser | null>;
+}
+
+abstract class IAuthService {
+    abstract getRefreshByUserId(id: Types.ObjectId): Promise<IRefresh | null>;
+}
 
 class AuthMiddleware {
-    #userService;
-    #authService;
 
-    constructor(userService, authService) {
-        this.#userService = userService;
-        this.#authService = authService;
-
+    constructor(private readonly userService: IUserService, private readonly authService: IAuthService) {
         this.checkAccessToken = this.checkAccessToken.bind(this);
         this.checkRefreshToken = this.checkRefreshToken.bind(this);
     }
 
-    async checkAccessToken(req, res, next) {
-        const token = AuthMiddleware.#getBearerToken(req)
+    async checkAccessToken(req: Request, res: Response, next: NextFunction) {
+        const token = AuthMiddleware.getBearerToken(req)
         if (!token) {
             return res.status(401).json({message: 'invalid access token'})
         }
 
         try {
             const payload = JwtHelper.parseAccess(token)
-            const user = await this.#userService.getOneById(payload.id)
+            const user = await this.userService.getOneById(payload!.id)
             if (!user) {
                 return res.status(401).json({message: 'invalid access token'})
             }
             req.user = user
             next();
         } catch (e) {
+            console.log(getErrorMessage(e))
             return res.status(401).json({message: 'invalid access token'})
         }
     }
 
-    async checkRefreshToken(req, res, next) {
-        const token = AuthMiddleware.#getBearerToken(req)
+    async checkRefreshToken(req: Request, res: Response, next: NextFunction) {
+        const token = AuthMiddleware.getBearerToken(req)
         if (!token) {
             return res.status(401).json({message: 'invalid refresh token'})
         }
 
         try {
             const payload = JwtHelper.parseRefresh(token)
-            const user = await this.#userService.getOneById(payload.id)
+            const user = await this.userService.getOneById(payload!.id)
             if (!user) {
                 return res.status(401).json({message: 'invalid refresh token'})
             }
-            const refresh = await this.#authService.getRefreshByUserId(user._id)
+            const refresh = await this.authService.getRefreshByUserId(user._id)
             if (!refresh || token !== refresh.token) {
                 return res.status(401).json({message: 'invalid access token'})
             }
             req.user = user
             next();
         } catch (e) {
-            console.log(e.message)
+            console.log(getErrorMessage(e))
             return res.status(401).json({message: 'invalid refresh token'})
         }
     }
 
-    static #getBearerToken(req) {
+    private static getBearerToken(req: Request): string {
         if (!req.headers.authorization) {
-            return null;
+            return '';
         }
 
         const authorization = req.headers.authorization.split(' ');
         if (authorization.length !== 2) {
-            return null;
+            return '';
         }
 
         const type = authorization[0]
         const token = authorization[1]
 
         if (!token || type !== 'Bearer') {
-            return null
+            return ''
         }
 
         return token

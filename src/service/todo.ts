@@ -1,21 +1,20 @@
-import Todo from "../entity/todo.js";
+import {ITodo, TodoModelType} from "../entity/todo";
+import {Types} from "mongoose";
 
 class TodoService {
-    #model; // Todo model
 
-    constructor(model) {
-        this.#model = model
+    constructor(private readonly todoModel: TodoModelType) {
     }
 
     /**
      * Метод создает пользователя
-     * @param {string} userId
+     * @param {Types.ObjectId} userId
      * @param {string} title
      * @param {string} description
      * @returns {Promise<string>}
      */
-    async create(userId, title, description) {
-        const todoItem = new this.#model({
+    public async create(userId: Types.ObjectId, title: string, description: string): Promise<string> {
+        const todoItem = new this.todoModel({
             title,
             description,
             author: userId,
@@ -23,39 +22,37 @@ class TodoService {
             updated_at: Date.now(),
         })
         await todoItem.save();
-
         return todoItem.id;
     }
 
     /**
      * Метод удаляет todo-item по id
      * @param {string} todoId
-     * @returns {Promise<Todo>}
+     * @returns {Promise<void>}
      */
-    async deleteOne(todoId) {
+    public async deleteOne(todoId: string) {
         const todoItem = await this.getOne(todoId)
         if (!todoItem) throw new Error("todo-item does not exist")
-
-        return this.#model.deleteOne({_id: todoId})
+        this.todoModel.deleteOne({id: todoId})
     }
 
     /**
      * Метод находит todo-item по id
      * @param {string} todoId
-     * @returns {Promise<Todo>}
+     * @returns {Promise<ITodo | null>}
      */
-    async getOne(todoId) {
-        return this.#model.findOne({_id: todoId})
+    async getOne(todoId: string): Promise<ITodo | null> {
+        return this.todoModel.findOne({id: todoId})
     }
 
     /**
      * Метод находит все todo-item пользователя по id пользователя
-     * @param {string} userId
+     * @param {Types.ObjectId} userId
      * @param {number} page
      * @param {number} limit
-     * @returns {Promise<Todo[]>}
+     * @returns {Promise<ITodo[]>}
      */
-    async getAllByUserId(userId, page, limit ) {
+    public async getAllByUserId(userId: Types.ObjectId, page: number, limit: number): Promise<ITodo[]> {
         page = page && page < 1 ? 1 : page
         limit = page && limit < 1 ? 10 : limit
 
@@ -66,12 +63,12 @@ class TodoService {
         }
 
         if (!page && !limit) {
-            return this.#model.find({author: userId})
+            return this.todoModel.find({author: userId})
         }
 
         page = page === 1 ? 0 : page - 1
 
-        return this.#model.find({author: userId}).skip(page*limit).limit(limit)
+        return this.todoModel.find({author: userId}).skip(page * limit).limit(limit)
     }
 
     /**
@@ -79,13 +76,13 @@ class TodoService {
      * @param {string} todoId
      * @param {string} title
      * @param {string} description
-     * @returns {Promise<Todo>}
+     * @returns {Promise<ITodo | null>}
      */
-    async editOne(todoId, title, description) {
+    public async editOne(todoId: string, title: string, description: string): Promise<ITodo | null> {
         const todoItem = await this.getOne(todoId)
         if (!todoItem) throw new Error("todo-item does not exist")
 
-        return this.#model.findOneAndUpdate(
+        return this.todoModel.findOneAndUpdate(
             {_id: todoItem._id},
             {
                 title: title,

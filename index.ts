@@ -1,37 +1,38 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv'
+import Server from "./src/server";
+
+// models
+import userModel from './src/entity/user'
+import todoModel from './src/entity/todo'
+import refreshModel from './src/entity/refresh'
+
+// routes
+import UserRouter from './src/routes/user';
+import TodoRouter from "./src/routes/todo";
+import AuthRouter from "./src/routes/auth";
+
+// controllers
+import UserController from './src/controller/user';
+import TodoController from './src/controller/todo';
+import AuthController from './src/controller/auth';
+
+// middlewares
+import AuthMiddleware from "./src/controller/middleware/auth";
+
+// services
+import UserService from "./src/service/user";
+import TodoService from "./src/service/todo";
+import AuthService from "./src/service/auth";
+
 dotenv.config()
 
 const app = express();
 
-import Server from "./src/server.js";
-
-// models
-import userModel from './src/entity/user.js'
-import todoModel from './src/entity/todo.js'
-import refreshModel from  './src/entity/refresh.js'
-
-// routes
-import UserRouter from './src/routes/user.js';
-import TodoRouter from "./src/routes/todo.js";
-import AuthRouter from "./src/routes/auth.js";
-
-// controllers
-import UserController from './src/controller/user.js';
-import TodoController from './src/controller/todo.js';
-import AuthController from './src/controller/auth.js';
-
-// middlewares
-import AuthMiddleware from "./src/controller/middleware/auth.js";
-
-// services
-import UserService from "./src/service/user.js";
-import TodoService from "./src/service/todo.js";
-import AuthService from "./src/service/auth.js";
-
 const port = Number(process.env.PORT) || 8000;
-const mongoConnectionString = process.env.IS_ATLAS === 'true' ?  process.env.MONGO_ATLAS : process.env.MONGO_LOCAL;
+const mongoConnectionString = process.env.IS_ATLAS as string === 'true' ?
+    process.env.MONGO_ATLAS as string : process.env.MONGO_LOCAL as string;
 
 const connectDB = async () => {
     return mongoose.connect(mongoConnectionString);
@@ -43,7 +44,7 @@ const bootstrap = async () => {
     const todoService = new TodoService(todoModel);
     const authService = new AuthService(refreshModel)
 
-    const userController = new UserController(userService);
+    const userController = new UserController();
     const todoController = new TodoController(todoService);
     const authController = new AuthController(authService, userService);
     const authMiddleware = new AuthMiddleware(userService, authService);
