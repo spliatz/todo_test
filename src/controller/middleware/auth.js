@@ -45,7 +45,7 @@ class AuthMiddleware {
             }
             const refresh = await this.#authService.getRefreshByUserId(user._id)
             if (!refresh || token !== refresh.token) {
-                return res.status(401).json({message: 'invalid access token'})
+                return res.status(401).json({message: 'invalid refresh token'})
             }
             req.user = user
             next();

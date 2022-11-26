@@ -1,5 +1,6 @@
 import JwtHelper from "../pkg/auth/jwt.js";
 import Refresh from "../entity/refresh.js";
+import { Types } from "mongoose";
 
 class AuthService {
     #refreshModel; // Refresh model
@@ -41,7 +42,7 @@ class AuthService {
 
     /**
      * Метод получения refresh токена по ID пользователя
-     * @param {string} userId
+     * @param {Types.ObjectId} userId
      * @returns {Promise}
      */
     async getRefreshByUserId(userId) {
@@ -51,7 +52,7 @@ class AuthService {
     /**
      * Метод удаления refresh токена по ID пользователя
      * @param {string} userId
-     * @returns {Promise<Refresh>}
+     * @returns {Promise}
      */
     async deleteRefreshByUserId(userId) {
         return this.#refreshModel.deleteOne({user: userId});

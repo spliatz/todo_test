@@ -135,7 +135,7 @@ status code 201
 
 ---
 
-- GET `/user/{userId}/todos?page=1&limit=5`
+- GET `/user/{userId}/todos?page=1&limit=5`  
   параметры page и limit необязательны, если оба параметра не указаны, то вернется весь список todo пользователя,  
   если указан лишь один параметр, то второму будет присвоено значение по умолчанию: page=1 limit=10.  
   Authorization: Bearer {Access Token}  
@@ -187,7 +187,7 @@ status code 201
 
 ---
 
-- GET `/todo/{id}`
+- GET `/todo/{id}`  
   Authorization: Bearer {Access Token}  
   response:  
   status code 200
@@ -205,7 +205,7 @@ status code 201
 
 ---
 
-- PUT `/todo/{id}`
+- PUT `/todo/{id}`  
   Authorization: Bearer {Access Token} body:
 
 ```json

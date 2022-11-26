@@ -53,6 +53,9 @@ class TodoController {
         const {id} = req.params
         try {
             const todoItem = await this.#service.getOne(id)
+            if (!todoItem) {
+                return res.status(403).json({message: "todo item does not exist"});
+            }
             return res.status(200).json(todoItem)
         } catch (e) {
             return res.status(500).json({message: e.message})
