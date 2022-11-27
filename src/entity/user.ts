@@ -1,24 +1,25 @@
-import {model, Schema, Document, Types} from 'mongoose'
+import { model, Schema, Document, Types } from 'mongoose'
 
-const schema = new Schema(
-    {
-        name: {type: String, required: true},
-        password: {type: String, required: true},
-        email: {type: String, required: true, unique: true},
-    },
-    {versionKey: false},
-);
-
-export interface IUser extends Document {
-    _id: Types.ObjectId;
-    id: string;
-    name: string;
-    password: string;
-    email: string;
+interface IUser {
+  _id: Types.ObjectId
+  id: string
+  name: string
+  password: string
+  email: string
 }
 
-const User = model<IUser>('User', schema);
+const schema = new Schema<IUser>(
+  {
+    name: { type: String, required: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+  },
+  { versionKey: false }
+)
 
-export type UserModelType = typeof User;
+const User = model<IUser>('User', schema)
 
-export default User;
+export type UserDocument = IUser & Document
+export type UserModelType = typeof User
+
+export default User

@@ -5,7 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "dev": "nodemon index.ts",
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "lint": "eslint . --ext .ts",
+    "prittier": "npx prettier --write ."
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +30,10 @@
     "@types/express": "^4.17.14",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
+    "@typescript-eslint/parser": "^5.44.0",
+    "eslint": "^8.28.0",
+    "prettier": "2.8.0",
     "ts-node": "^10.9.1"
   }
 }

@@ -1,9 +1,9 @@
-import {IUser} from 'src/entity/user'
+import { UserDocument } from 'src/entity/user'
 
 declare global {
-    declare namespace Express {
-        export interface Request {
-            user: IUser;
-        }
+  declare namespace Express {
+    export interface Request {
+      user: UserDocument
     }
+  }
 }

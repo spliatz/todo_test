@@ -15,19 +15,19 @@
 ```
 
 ```Shell
-  $ cd todo_test    
+  $ cd todo_test
 ```
 
 ```Shell
-  $ npm install   
+  $ npm install
 ```
 
 ## ENV
 
-Вам необходимо создать  *.env* файл
+Вам необходимо создать _.env_ файл
 
 ```Shell
-  $ touch .env    
+  $ touch .env
 ```
 
 В нем необходимо описать следующие поля:
@@ -41,17 +41,17 @@ JWT_ACCESS_KEY=секрет для access токена
 JWT_REFRESH_KEY=секрет для refresh токена
 
 ```Shell
-  $ npm start    
+  $ npm start
 ```
 
-Приложение будет запущенно на порте, указанном в *.env* или на 8000 порту, если в *.env* нет поля PORT
+Приложение будет запущенно на порте, указанном в _.env_ или на 8000 порту, если в _.env_ нет поля PORT
 
 # ENDPOINTS
 
 ## auth
 
-- POST `/auth/sign-up` - Регистрация   
-  body:  
+- POST `/auth/sign-up` - Регистрация  
+  body:
 
 ```json
 {
@@ -59,14 +59,14 @@ JWT_REFRESH_KEY=секрет для refresh токена
   "password": "Password",
   "email": "Email"
 }
-```  
+```
 
 response:  
 status code 201
 
 ---
 
-- POST `/auth/sign-in` - Авторизация    
+- POST `/auth/sign-in` - Авторизация  
   body:
 
 ```json
@@ -74,7 +74,7 @@ status code 201
   "email": "Email",
   "password": "Password"
 }
-```  
+```
 
 response:  
 status code 201
@@ -112,7 +112,7 @@ status code 201
 
 - DELETE `/auth/logout`  
   Authorization: Bearer {Refresh Token}  
-  response:    
+  response:  
   status code 200
 
 # user
